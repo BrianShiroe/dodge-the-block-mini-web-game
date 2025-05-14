@@ -7,11 +7,11 @@ let spawnRate = 500; // Initial obstacle spawn rate (ms)
 let spawnTimeout;
 let lastKeyPressed = null; // Track last key pressed
 let keys = {}; // Track currently pressed keys
+let highScore = localStorage.getItem("highScore") || 0;
 
-const bgMusic = new Audio("retro-music.mp3");
+const bgMusic = new Audio("assets/retro-music.mp3");
+const deathSound = new Audio("assets/retro-death-effect.mp3");
 bgMusic.loop = true;
-
-const deathSound = new Audio("retro-death-effect.mp3");
 
 document.getElementById("playButton").addEventListener("click", startGame);
 document.addEventListener("keydown", handleKeyDown);
@@ -23,6 +23,9 @@ document.addEventListener("keydown", (e) => {
 });
 
 function startGame() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
     document.getElementById("playButton").style.display = "none";
     document.getElementById("title").style.display = "none";
     document.getElementById("description").style.display = "none";
@@ -33,7 +36,14 @@ function startGame() {
 }
 
 function resetGame() {
-    player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 7, dx: 0 };
+    player = { 
+        x: canvas.width / 2 - 25, 
+        y: canvas.height - 60, 
+        width: 50, 
+        height: 50, 
+        speed: 7, 
+        dx: 0 
+    };
     obstacles = [];
     score = 0;
     gameOver = false;
@@ -41,6 +51,7 @@ function resetGame() {
     spawnRate = 500;
     bgMusic.currentTime = 0;
     bgMusic.play();
+    highScore = localStorage.getItem("highScore") || 0;
 }
 
 function handleKeyDown(e) {
@@ -101,6 +112,16 @@ function createObstacle() {
     });
 }
 
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    if (player) {
+        player.x = Math.min(player.x, canvas.width - player.width);
+        player.y = canvas.height - 60;
+    }
+});
+
 function updateGame() {
     if (gameOver) return;
 
@@ -140,10 +161,15 @@ function updateGame() {
         }
     });
 
-    // Display score
+    // Display score and high score
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.fillText("Score: " + score, 10, 30);
+
+    // Only show high score if it exists (> 0)
+    if (highScore > 0) {
+        ctx.fillText("High Score: " + highScore, 10, 60);
+    }
 
     // Display current obstacle speed
     // ctx.fillText("Speed: " + obstacleSpeed.toFixed(2), 10, 60);
@@ -163,6 +189,12 @@ function endGame() {
     bgMusic.pause();
     deathSound.play();
     clearTimeout(spawnTimeout); // Stop new obstacles from spawning
+
+    // Update high score if current score is higher
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem("highScore", highScore);
+    }
 
     setTimeout(() => {
         document.getElementById("playButton").style.display = "block";
