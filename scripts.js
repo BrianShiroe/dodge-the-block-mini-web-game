@@ -23,9 +23,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 function startGame() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     document.getElementById("playButton").style.display = "none";
     document.getElementById("title").style.display = "none";
     document.getElementById("description").style.display = "none";
@@ -36,14 +33,7 @@ function startGame() {
 }
 
 function resetGame() {
-    player = { 
-        x: canvas.width / 2 - 25, 
-        y: canvas.height - 60, 
-        width: 50, 
-        height: 50, 
-        speed: 7, 
-        dx: 0 
-    };
+    player = { x: canvas.width / 2 - 25, y: canvas.height - 60, width: 50, height: 50, speed: 7, dx: 0 };
     obstacles = [];
     score = 0;
     gameOver = false;
@@ -111,16 +101,6 @@ function createObstacle() {
         speed: obstacleSpeed, // New obstacles inherit updated speed
     });
 }
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    if (player) {
-        player.x = Math.min(player.x, canvas.width - player.width);
-        player.y = canvas.height - 60;
-    }
-});
 
 function updateGame() {
     if (gameOver) return;
